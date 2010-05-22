@@ -1,0 +1,6 @@
+http://download.forge.objectweb.org/asm/asm-3.0.jar
+http://repository.codehaus.org/com/thoughtworks/paranamer/paranamer/1.5/paranamer-1.5.jar
+http://repository.codehaus.org/com/thoughtworks/qdox/qdox/1.9.1/qdox-1.9.1.jar
+http://www.slf4j.org/dist/slf4j-1.5.8.tar.gz
+http://repository.codehaus.org/org/codehaus/jackson/jackson-core-asl/1.0.1/jackson-core-asl-1.0.1.jar
+http://repository.codehaus.org/org/codehaus/jackson/jackson-mapper-asl/1.0.1/jackson-mapper-asl-1.0.1.jar

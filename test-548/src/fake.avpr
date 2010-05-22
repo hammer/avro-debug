@@ -1,0 +1,9 @@
+{
+  "protocol": "FakeProto",
+  "messages": {
+    "fakeMethod": {
+      "request": [],
+      "response": "null"
+    }
+  }
+}
