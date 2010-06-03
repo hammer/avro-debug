@@ -1,10 +1,18 @@
 import org.apache.avro.ipc.HttpServer;
 import org.apache.avro.specific.SpecificResponder;
+import org.apache.avro.util.Utf8;
 
 public class FakeServer {
   public static class FakeImpl implements FakeProto {
-    public Void fakeMethod() {
-      return null;
+    public Void fakeMethod() throws FakeError {
+      FakeError fe = new FakeError();
+      fe.message = new Utf8("This is a fake error.");
+      throw fe;
+    }
+    public Void anotherFakeMethod() throws FakeError, AnotherFakeError {
+      FakeError fe = new FakeError();
+      fe.message = new Utf8("This is a fake error.");
+      throw fe;
     }
   }
 

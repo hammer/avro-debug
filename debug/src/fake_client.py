@@ -13,4 +13,8 @@ if __name__ == "__main__":
   client = ipc.HTTPTransceiver(host, port)
   requestor = ipc.Requestor(PROTOCOL, client)
 
-  requestor.request("fakeMethod", {})
+  # Barf reading the second branch of a union schema with one branch
+  #requestor.request("fakeMethod", {})
+
+  # Throws an AvroRemoteException nicely
+  requestor.request("anotherFakeMethod", {})

@@ -1,0 +1,21 @@
+{
+  "protocol": "FakeProto",
+  "types": [
+    {"name": "FakeError", "type": "error", "fields": [
+      {"name": "message", "type": "string"}]},
+    {"name": "AnotherFakeError", "type": "error", "fields": [
+      {"name": "message", "type": "string"}]}
+  ],
+  "messages": {
+    "fakeMethod": {
+      "request": [],
+      "response": "null",
+      "errors": ["FakeError"]
+    },
+    "anotherFakeMethod": {
+      "request": [],
+      "response": "null",
+      "errors": ["FakeError", "AnotherFakeError"]
+    }
+  }
+}
