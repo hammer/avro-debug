@@ -15,6 +15,7 @@
  * permissions and limitations under the License. 
  */
 
+#include "config.h"
 #include "avro_private.h"
 #include <inttypes.h>
 #include <stdlib.h>
@@ -25,6 +26,7 @@
 #include "jansson.h"
 #include "st.h"
 #include "schema.h"
+#include "allocator.h"
 
 #define DEFAULT_TABLE_SIZE 32
 
@@ -68,9 +70,9 @@ static int record_free_foreach(int i, struct avro_record_field_t *field,
 	AVRO_UNUSED(i);
 	AVRO_UNUSED(arg);
 
-	free(field->name);
+	avro_atom_decref(field->name);
 	avro_schema_decref(field->type);
-	free(field);
+	g_avro_allocator.free(field);
 	return ST_DELETE;
 }
 
@@ -79,7 +81,7 @@ static int enum_free_foreach(int i, char *sym, void *arg)
 	AVRO_UNUSED(i);
 	AVRO_UNUSED(arg);
 
-	free(sym);
+	g_avro_allocator.free(sym);
 	return ST_DELETE;
 }
 
@@ -110,35 +112,35 @@ static void avro_schema_free(avro_schema_t schema)
 		case AVRO_RECORD:{
 				struct avro_record_schema_t *record;
 				record = avro_schema_to_record(schema);
-				free(record->name);
+				g_avro_allocator.free(record->name);
 				if (record->space) {
-					free(record->space);
+					g_avro_allocator.free(record->space);
 				}
 				st_foreach(record->fields, record_free_foreach,
 					   0);
 				st_free_table(record->fields_byname);
 				st_free_table(record->fields);
-				free(record);
+				g_avro_allocator.free(record);
 			}
 			break;
 
 		case AVRO_ENUM:{
 				struct avro_enum_schema_t *enump;
 				enump = avro_schema_to_enum(schema);
-				free(enump->name);
+				g_avro_allocator.free(enump->name);
 				st_foreach(enump->symbols, enum_free_foreach,
 					   0);
 				st_free_table(enump->symbols);
 				st_free_table(enump->symbols_byname);
-				free(enump);
+				g_avro_allocator.free(enump);
 			}
 			break;
 
 		case AVRO_FIXED:{
 				struct avro_fixed_schema_t *fixed;
 				fixed = avro_schema_to_fixed(schema);
-				free((char *)fixed->name);
-				free(fixed);
+				g_avro_allocator.free((char *)fixed->name);
+				g_avro_allocator.free(fixed);
 			}
 			break;
 
@@ -146,7 +148,7 @@ static void avro_schema_free(avro_schema_t schema)
 				struct avro_map_schema_t *map;
 				map = avro_schema_to_map(schema);
 				avro_schema_decref(map->values);
-				free(map);
+				g_avro_allocator.free(map);
 			}
 			break;
 
@@ -154,7 +156,7 @@ static void avro_schema_free(avro_schema_t schema)
 				struct avro_array_schema_t *array;
 				array = avro_schema_to_array(schema);
 				avro_schema_decref(array->items);
-				free(array);
+				g_avro_allocator.free(array);
 			}
 			break;
 		case AVRO_UNION:{
@@ -163,7 +165,7 @@ static void avro_schema_free(avro_schema_t schema)
 				st_foreach(unionp->branches, union_free_foreach,
 					   0);
 				st_free_table(unionp->branches);
-				free(unionp);
+				g_avro_allocator.free(unionp);
 			}
 			break;
 
@@ -171,7 +173,7 @@ static void avro_schema_free(avro_schema_t schema)
 				struct avro_link_schema_t *link;
 				link = avro_schema_to_link(schema);
 				avro_schema_decref(link->to);
-				free(link);
+				g_avro_allocator.free(link);
 			}
 			break;
 		}
@@ -197,9 +199,9 @@ void avro_schema_decref(avro_schema_t schema)
 avro_schema_t avro_schema_string(void)
 {
 	static struct avro_obj_t obj = {
-		.type = AVRO_STRING,
-		.class_type = AVRO_SCHEMA,
-		.refcount = 1
+		AVRO_STRING, // type
+		AVRO_SCHEMA, // class_type
+		1            // refcount
 	};
 	return &obj;
 }
@@ -207,9 +209,9 @@ avro_schema_t avro_schema_string(void)
 avro_schema_t avro_schema_bytes(void)
 {
 	static struct avro_obj_t obj = {
-		.type = AVRO_BYTES,
-		.class_type = AVRO_SCHEMA,
-		.refcount = 1
+		AVRO_BYTES,  // type
+		AVRO_SCHEMA, // class_type
+		1            // refcount
 	};
 	return &obj;
 }
@@ -217,9 +219,9 @@ avro_schema_t avro_schema_bytes(void)
 avro_schema_t avro_schema_int(void)
 {
 	static struct avro_obj_t obj = {
-		.type = AVRO_INT32,
-		.class_type = AVRO_SCHEMA,
-		.refcount = 1
+		AVRO_INT32,  // type
+		AVRO_SCHEMA, // class_type
+		1            // refcount
 	};
 	return &obj;
 }
@@ -227,9 +229,9 @@ avro_schema_t avro_schema_int(void)
 avro_schema_t avro_schema_long(void)
 {
 	static struct avro_obj_t obj = {
-		.type = AVRO_INT64,
-		.class_type = AVRO_SCHEMA,
-		.refcount = 1
+		AVRO_INT64,  // type
+		AVRO_SCHEMA, // class_type
+		1            // refcount
 	};
 	return &obj;
 }
@@ -237,9 +239,9 @@ avro_schema_t avro_schema_long(void)
 avro_schema_t avro_schema_float(void)
 {
 	static struct avro_obj_t obj = {
-		.type = AVRO_FLOAT,
-		.class_type = AVRO_SCHEMA,
-		.refcount = 1
+		AVRO_FLOAT,  // type
+		AVRO_SCHEMA, // class_type
+		1            // refcount
 	};
 	return &obj;
 }
@@ -247,9 +249,9 @@ avro_schema_t avro_schema_float(void)
 avro_schema_t avro_schema_double(void)
 {
 	static struct avro_obj_t obj = {
-		.type = AVRO_DOUBLE,
-		.class_type = AVRO_SCHEMA,
-		.refcount = 1
+		AVRO_DOUBLE, // type
+		AVRO_SCHEMA, // class_type
+		1            // refcount
 	};
 	return &obj;
 }
@@ -257,9 +259,9 @@ avro_schema_t avro_schema_double(void)
 avro_schema_t avro_schema_boolean(void)
 {
 	static struct avro_obj_t obj = {
-		.type = AVRO_BOOLEAN,
-		.class_type = AVRO_SCHEMA,
-		.refcount = 1
+		AVRO_BOOLEAN, // type
+		AVRO_SCHEMA,  // class_type
+		1             // refcount
 	};
 	return &obj;
 }
@@ -267,9 +269,9 @@ avro_schema_t avro_schema_boolean(void)
 avro_schema_t avro_schema_null(void)
 {
 	static struct avro_obj_t obj = {
-		.type = AVRO_NULL,
-		.class_type = AVRO_SCHEMA,
-		.refcount = 1
+		AVRO_NULL,   // type
+		AVRO_SCHEMA, // class_type
+		1            // refcount
 	};
 	return &obj;
 }
@@ -277,14 +279,14 @@ avro_schema_t avro_schema_null(void)
 avro_schema_t avro_schema_fixed(const char *name, const int64_t size)
 {
 	struct avro_fixed_schema_t *fixed =
-	    malloc(sizeof(struct avro_fixed_schema_t));
+	    g_avro_allocator.malloc(sizeof(struct avro_fixed_schema_t));
 	if (!fixed) {
 		return NULL;
 	}
 	if (!is_avro_id(name)) {
 		return NULL;
 	}
-	fixed->name = strdup(name);
+	fixed->name = avro_strdup(name);
 	fixed->size = size;
 	avro_schema_init(&fixed->obj, AVRO_FIXED);
 	return &fixed->obj;
@@ -293,13 +295,13 @@ avro_schema_t avro_schema_fixed(const char *name, const int64_t size)
 avro_schema_t avro_schema_union(void)
 {
 	struct avro_union_schema_t *schema =
-	    malloc(sizeof(struct avro_union_schema_t));
+	    g_avro_allocator.malloc(sizeof(struct avro_union_schema_t));
 	if (!schema) {
 		return NULL;
 	}
 	schema->branches = st_init_numtable_with_size(DEFAULT_TABLE_SIZE);
 	if (!schema->branches) {
-		free(schema);
+		g_avro_allocator.free(schema);
 		return NULL;
 	}
 
@@ -325,7 +327,7 @@ avro_schema_union_append(const avro_schema_t union_schema,
 avro_schema_t avro_schema_array(const avro_schema_t items)
 {
 	struct avro_array_schema_t *array =
-	    malloc(sizeof(struct avro_array_schema_t));
+	    g_avro_allocator.malloc(sizeof(struct avro_array_schema_t));
 	if (!array) {
 		return NULL;
 	}
@@ -337,7 +339,7 @@ avro_schema_t avro_schema_array(const avro_schema_t items)
 avro_schema_t avro_schema_map(const avro_schema_t values)
 {
 	struct avro_map_schema_t *map =
-	    malloc(sizeof(struct avro_map_schema_t));
+	    g_avro_allocator.malloc(sizeof(struct avro_map_schema_t));
 	if (!map) {
 		return NULL;
 	}
@@ -353,26 +355,26 @@ avro_schema_t avro_schema_enum(const char *name)
 	if (!is_avro_id(name)) {
 		return NULL;
 	}
-	enump = malloc(sizeof(struct avro_enum_schema_t));
+	enump = g_avro_allocator.malloc(sizeof(struct avro_enum_schema_t));
 	if (!enump) {
 		return NULL;
 	}
-	enump->name = strdup(name);
+	enump->name = avro_strdup(name);
 	if (!enump->name) {
-		free(enump);
+		g_avro_allocator.free(enump);
 		return NULL;
 	}
 	enump->symbols = st_init_numtable_with_size(DEFAULT_TABLE_SIZE);
 	if (!enump->symbols) {
-		free(enump->name);
-		free(enump);
+		g_avro_allocator.free(enump->name);
+		g_avro_allocator.free(enump);
 		return NULL;
 	}
 	enump->symbols_byname = st_init_strtable_with_size(DEFAULT_TABLE_SIZE);
 	if (!enump->symbols_byname) {
 		st_free_table(enump->symbols);
-		free(enump->name);
-		free(enump);
+		g_avro_allocator.free(enump->name);
+		g_avro_allocator.free(enump);
 		return NULL;
 	}
 	avro_schema_init(&enump->obj, AVRO_ENUM);
@@ -390,7 +392,7 @@ avro_schema_enum_symbol_append(const avro_schema_t enum_schema,
 		return EINVAL;
 	}
 	enump = avro_schema_to_enum(enum_schema);
-	sym = strdup(symbol);
+	sym = avro_strdup(symbol);
 	if (!sym) {
 		return ENOMEM;
 	}
@@ -413,11 +415,11 @@ avro_schema_record_field_append(const avro_schema_t record_schema,
 		return EINVAL;
 	}
 	record = avro_schema_to_record(record_schema);
-	new_field = malloc(sizeof(struct avro_record_field_t));
+	new_field = g_avro_allocator.malloc(sizeof(struct avro_record_field_t));
 	if (!new_field) {
 		return ENOMEM;
 	}
-	new_field->name = strdup(field_name);
+	new_field->name = avro_atom_add(field_name);
 	new_field->type = avro_schema_incref(field_schema);
 	st_insert(record->fields, record->fields->num_entries,
 		  (st_data_t) new_field);
@@ -432,37 +434,38 @@ avro_schema_t avro_schema_record(const char *name, const char *space)
 	if (!is_avro_id(name)) {
 		return NULL;
 	}
-	record = malloc(sizeof(struct avro_record_schema_t));
+	record = g_avro_allocator.malloc(sizeof(struct avro_record_schema_t));
 	if (!record) {
 		return NULL;
 	}
-	record->name = strdup(name);
+	record->name = avro_strdup(name);
 	if (!record->name) {
-		free(record);
+		g_avro_allocator.free(record);
 		return NULL;
 	}
-	record->space = space ? strdup(space) : NULL;
+	record->space = space ? avro_strdup(space) : NULL;
 	if (space && !record->space) {
-		free(record->name);
-		free(record);
+		g_avro_allocator.free(record->name);
+		g_avro_allocator.free(record);
 		return NULL;
 	}
 	record->fields = st_init_numtable_with_size(DEFAULT_TABLE_SIZE);
 	if (!record->fields) {
 		if (record->space) {
-			free(record->space);
+			g_avro_allocator.free(record->space);
 		}
-		free(record->name);
-		free(record);
+		g_avro_allocator.free(record->name);
+		g_avro_allocator.free(record);
 		return NULL;
 	}
-	record->fields_byname = st_init_strtable_with_size(DEFAULT_TABLE_SIZE);
+	record->fields_byname = st_init_numtable_with_size(DEFAULT_TABLE_SIZE);
 	if (!record->fields_byname) {
 		st_free_table(record->fields);
-		free(record->name);
-		free(record);
+		g_avro_allocator.free(record->name);
+		g_avro_allocator.free(record);
 		return NULL;
 	}
+	record->num_fields = 0;
 
 	avro_schema_init(&record->obj, AVRO_RECORD);
 	return &record->obj;
@@ -496,7 +499,7 @@ avro_schema_t avro_schema_link(avro_schema_t to)
 	if (!is_avro_named_type(to)) {
 		return NULL;
 	}
-	link = malloc(sizeof(struct avro_link_schema_t));
+	link = g_avro_allocator.malloc(sizeof(struct avro_link_schema_t));
 	if (!link) {
 		return NULL;
 	}
@@ -853,7 +856,7 @@ avro_schema_from_json(const char *jsontext, const int32_t len,
 		return EINVAL;
 	}
 
-	error = malloc(sizeof(struct avro_schema_error_t_));
+	error = g_avro_allocator.malloc(sizeof(struct avro_schema_error_t_));
 	if (!error) {
 		return ENOMEM;
 	}
@@ -861,14 +864,14 @@ avro_schema_from_json(const char *jsontext, const int32_t len,
 
 	error->named_schemas = st_init_strtable_with_size(DEFAULT_TABLE_SIZE);
 	if (!error->named_schemas) {
-		free(error);
+		g_avro_allocator.free(error);
 		return ENOMEM;
 	}
 
 	root = json_loads(jsontext, &error->json_error);
 	if (!root) {
 		st_free_table(error->named_schemas);
-		free(error);
+		g_avro_allocator.free(error);
 		return EINVAL;
 	}
 
@@ -880,7 +883,7 @@ avro_schema_from_json(const char *jsontext, const int32_t len,
 	st_free_table(error->named_schemas);
 	if (rval == 0) {
 		/* no need for an error return */
-		free(error);
+		g_avro_allocator.free(error);
 	}
 	return rval;
 }
@@ -919,11 +922,12 @@ avro_schema_t avro_schema_copy(avro_schema_t schema)
 					st_data_t data;
 					struct avro_record_field_t *field;
 				} val;
+				avro_schema_t type_copy;
 				st_lookup(record_schema->fields, i, &val.data);
-				avro_schema_t type_copy =
-				    avro_schema_copy(val.field->type);
+				type_copy = avro_schema_copy(val.field->type);
+				// FIXME: Remove avro_atom_to_string() here.
 				avro_schema_record_field_append(new_schema,
-								val.field->name,
+								avro_atom_to_string(val.field->name),
 								type_copy);
 			}
 		}
@@ -1047,7 +1051,7 @@ static int write_field(avro_writer_t out, struct avro_record_field_t *field)
 {
 	int rval;
 	check(rval, avro_write_str(out, "{\"name\":\""));
-	check(rval, avro_write_str(out, field->name));
+	check(rval, avro_write_str(out, avro_atom_to_string(field->name)));
 	check(rval, avro_write_str(out, "\",\"type\":"));
 	check(rval, avro_schema_to_json(field->type, out));
 	return avro_write_str(out, "}");

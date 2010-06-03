@@ -15,12 +15,26 @@
  * permissions and limitations under the License. 
  */
 
-#ifndef DUMP_H
-#define DUMP_H
+#include "avro_private.h"
+#include "allocator_system.h"
 
-#include <stdio.h>
-#include "types.h"
+// TODO: Make these configurable in the future somehow
+#define INITIAL_ATOM_TABLE_SIZE 512
 
-void dump(FILE * out, const caddr_t addr, const long len);
+void avro_init(void)
+{
+    avro_allocator_system_initialize();
 
-#endif
+	if (NULL == g_avro_atom_table) {
+		g_avro_atom_table = avro_atom_table_create(INITIAL_ATOM_TABLE_SIZE);
+	}
+}
+
+void avro_shutdown(void)
+{
+	if (NULL != g_avro_atom_table) {
+		avro_atom_table_destroy(g_avro_atom_table);
+		g_avro_atom_table = NULL;
+	}
+}
+

@@ -14,13 +14,17 @@
  * implied.  See the License for the specific language governing
  * permissions and limitations under the License. 
  */
+#ifndef AVRO_CONFIG_H
+#define AVRO_CONFIG_H
 
-#ifndef DUMP_H
-#define DUMP_H
+#ifdef WIN32
 
-#include <stdio.h>
-#include "types.h"
+// MSVC doesn't support C99, hence inline is not recognized as a keyword,
+// so we need to use the MSVC specific __inline instead.
+#define inline __inline
 
-void dump(FILE * out, const caddr_t addr, const long len);
+#define snprintf _snprintf
 
-#endif
+#endif // WIN32
+
+#endif // AVRO_CONFIG_H

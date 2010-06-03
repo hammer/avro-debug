@@ -14,13 +14,27 @@
  * implied.  See the License for the specific language governing
  * permissions and limitations under the License. 
  */
+#ifndef AVRO_TYPES_H
+#define AVRO_TYPES_H
 
-#ifndef DUMP_H
-#define DUMP_H
+#ifdef WIN32
 
-#include <stdio.h>
-#include "types.h"
+typedef signed __int8  int8_t;
+typedef signed __int16 int16_t;
+typedef signed __int32 int32_t;
+typedef signed __int64 int64_t;
 
-void dump(FILE * out, const caddr_t addr, const long len);
+typedef unsigned __int8  uint8_t;
+typedef unsigned __int16 uint16_t;
+typedef unsigned __int32 uint32_t;
+typedef unsigned __int64 uint64_t;
 
-#endif
+typedef char* caddr_t;
+
+#else // if not WIN32
+#include <stdint.h>
+#include <sys/types.h>
+#endif // WIN32
+
+#endif // AVRO_TYPES_H
+
