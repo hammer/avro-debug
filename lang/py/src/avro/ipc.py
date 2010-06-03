@@ -470,10 +470,8 @@ class HTTPTransceiver(object):
   conn = property(lambda self: self._conn, set_conn)
 
   def transceive(self, request):
-    print "Requestor sending a POST request."
     self.write_framed_message(request)
     result = self.read_framed_message()
-    print "Requestor received a response."
     return result
 
   def read_framed_message(self):
