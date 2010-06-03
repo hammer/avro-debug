@@ -1,3 +1,5 @@
+import os
+
 import avro.ipc as ipc
 import avro.protocol as protocol
 

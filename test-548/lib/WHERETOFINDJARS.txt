@@ -1,0 +1,7 @@
+http://download.forge.objectweb.org/asm/asm-3.0.jar
+http://repository.codehaus.org/com/thoughtworks/paranamer/paranamer/1.5/paranamer-1.5.jar
+http://repository.codehaus.org/com/thoughtworks/qdox/qdox/1.9.1/qdox-1.9.1.jar
+http://www.slf4j.org/dist/slf4j-1.5.8.tar.gz (api and simple)
+http://repository.codehaus.org/org/codehaus/jackson/jackson-core-asl/1.4.2/jackson-core-asl-1.4.2.jar
+http://repository.codehaus.org/org/codehaus/jackson/jackson-mapper-asl/1.4.2/jackson-mapper-asl-1.4.2.jar
+http://dist.codehaus.org/jetty/jetty-6.1.14/jetty-6.1.14.zip (jetty, jetty-util, servlet-api-2.5)
