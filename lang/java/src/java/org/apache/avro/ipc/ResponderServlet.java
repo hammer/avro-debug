@@ -41,7 +41,6 @@ public class ResponderServlet extends HttpServlet {
   protected void doPost(HttpServletRequest request,
                         HttpServletResponse response)
     throws IOException, ServletException {
-    System.out.println("Responder received a POST request.");
     response.setContentType(HttpTransceiver.CONTENT_TYPE);
     List<ByteBuffer> requestBufs =
       HttpTransceiver.readBuffers(request.getInputStream());

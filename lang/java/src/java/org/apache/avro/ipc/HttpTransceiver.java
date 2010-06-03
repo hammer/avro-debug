@@ -45,7 +45,6 @@ public class HttpTransceiver extends Transceiver {
 
   public synchronized void writeBuffers(List<ByteBuffer> buffers)
     throws IOException {
-    System.out.println("Responder writing a POST response.");
     connection = (HttpURLConnection)url.openConnection();
     connection.setRequestMethod("POST");
     connection.setRequestProperty("Content-Type", CONTENT_TYPE);
